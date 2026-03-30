@@ -1,0 +1,1184 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一级PE标的发现引擎 · AI + Agent Live Demo</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#10182f;
+      --panel-2:#0f1630;
+      --border:rgba(255,255,255,.09);
+      --text:#eef3ff;
+      --muted:#9fb0d9;
+      --accent:#5eead4;
+      --accent-2:#7c9cff;
+      --danger:#ff8d7d;
+      --warning:#ffd480;
+      --success:#76f7ad;
+      --shadow:0 18px 60px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(1200px 600px at 15% -10%, rgba(94,234,212,.12), transparent 55%),
+        radial-gradient(900px 500px at 95% 0%, rgba(124,156,255,.12), transparent 45%),
+        linear-gradient(180deg, #08101e 0%, #0b1020 60%, #0a1022 100%);
+      color:var(--text);
+      min-height:100vh;
+    }
+    a{color:#8ed6ff;text-decoration:none}
+    .shell{max-width:1580px;margin:0 auto;padding:24px 24px 48px}
+    .topbar{
+      display:flex;justify-content:space-between;align-items:center;gap:16px;
+      position:sticky;top:0;z-index:50;
+      padding:14px 0 18px;
+      backdrop-filter: blur(8px);
+    }
+    .brand{
+      display:flex;align-items:center;gap:14px;
+    }
+    .logo{
+      width:42px;height:42px;border-radius:12px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg, rgba(94,234,212,.18), rgba(124,156,255,.24));
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:var(--shadow);
+      font-weight:800;letter-spacing:.03em;
+    }
+    .brand h1{margin:0;font-size:20px;line-height:1.1}
+    .brand p{margin:4px 0 0;font-size:12px;color:var(--muted)}
+    .badges{display:flex;flex-wrap:wrap;gap:10px}
+    .badge{
+      padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.04);
+      border:1px solid var(--border);font-size:12px;color:var(--muted)
+    }
+    .hero{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:20px;
+      align-items:stretch;
+      margin-top:6px;
+    }
+    .card{
+      background:linear-gradient(180deg, rgba(16,24,47,.92), rgba(12,18,36,.96));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .hero-left{padding:28px}
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 12px;border-radius:999px;
+      border:1px solid rgba(94,234,212,.25);background:rgba(94,234,212,.07);
+      color:#baf7ee;font-size:12px;letter-spacing:.08em;text-transform:uppercase
+    }
+    .hero-left h2{
+      margin:18px 0 12px;font-size:38px;line-height:1.08;letter-spacing:-.03em;
+      max-width:860px;
+    }
+    .hero-left p.lead{
+      margin:0 0 18px;color:#d6e0ff;font-size:15px;line-height:1.7;max-width:980px
+    }
+    .hero-grid{
+      display:grid;grid-template-columns: repeat(3, minmax(0,1fr));gap:14px;margin-top:20px
+    }
+    .hero-stat{
+      background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px;padding:16px
+    }
+    .hero-stat .label{font-size:12px;color:var(--muted)}
+    .hero-stat .value{font-size:20px;font-weight:700;margin-top:8px}
+    .hero-tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+    .tag{
+      padding:8px 12px;border-radius:999px;background:rgba(124,156,255,.08);
+      border:1px solid rgba(124,156,255,.16);font-size:12px;color:#d8e3ff
+    }
+    .control{padding:22px 22px 18px;display:flex;flex-direction:column}
+    .control h3{margin:0 0 10px;font-size:20px}
+    .control .sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:16px}
+    .field{margin-bottom:12px}
+    .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:8px}
+    .field input,.field textarea,.field select{
+      width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--border);
+      background:rgba(255,255,255,.04);color:var(--text);outline:none;font-size:14px
+    }
+    .field textarea{min-height:96px;resize:vertical}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+    button{
+      border:none;border-radius:14px;padding:12px 16px;font-size:14px;font-weight:700;
+      cursor:pointer;transition:transform .15s ease, opacity .15s ease, box-shadow .15s ease;
+    }
+    button:hover{transform:translateY(-1px)}
+    .btn-primary{
+      background:linear-gradient(135deg, #5eead4, #7c9cff);color:#07111d;box-shadow:0 14px 36px rgba(124,156,255,.18)
+    }
+    .btn-secondary{
+      background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text)
+    }
+    .btn-ghost{
+      background:transparent;border:1px dashed rgba(255,255,255,.16);color:var(--muted)
+    }
+    .note{
+      margin-top:12px;font-size:12px;color:var(--muted);line-height:1.7
+    }
+    .section{margin-top:18px}
+    .section-head{
+      display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:0 2px 10px
+    }
+    .section-head h3{margin:0;font-size:22px}
+    .section-head p{margin:0;color:var(--muted);font-size:13px}
+    .modules{
+      padding:22px;
+    }
+    .modules-grid{
+      display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-top:12px
+    }
+    .module-card{
+      background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:16px;padding:16px;min-height:230px
+    }
+    .module-card .num{
+      width:28px;height:28px;border-radius:999px;display:grid;place-items:center;
+      background:rgba(94,234,212,.12);color:#baf7ee;font-weight:800;margin-bottom:10px
+    }
+    .module-card h4{margin:0 0 10px;font-size:15px}
+    .module-card p{margin:0;color:#d8e3ff;font-size:13px;line-height:1.65}
+    .duo{
+      display:grid;grid-template-columns:1.05fr .95fr;gap:18px;margin-top:18px
+    }
+    .pad{padding:22px}
+    .formula{
+      margin-top:12px;padding:14px 16px;border-radius:16px;background:rgba(94,234,212,.06);border:1px solid rgba(94,234,212,.15);font-weight:700;color:#dffef9
+    }
+    .score-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+    .score-item{
+      padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--border)
+    }
+    .score-item .row{display:flex;justify-content:space-between;gap:10px}
+    .score-item .name{font-size:13px}
+    .score-item .w{font-size:12px;color:var(--muted)}
+    .score-item small{display:block;margin-top:8px;color:var(--muted);line-height:1.5}
+    .arch-list{display:grid;grid-template-columns:1fr;gap:12px;margin-top:12px}
+    .arch-step{
+      display:grid;grid-template-columns:auto 1fr;gap:12px;
+      padding:14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--border)
+    }
+    .arch-step .icon{
+      width:34px;height:34px;border-radius:12px;background:rgba(124,156,255,.12);display:grid;place-items:center;font-weight:800
+    }
+    .arch-step strong{display:block;margin-bottom:6px}
+    .arch-step span{display:block;color:var(--muted);font-size:13px;line-height:1.6}
+    .runtime{padding:22px}
+    .progress-grid{
+      display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:12px
+    }
+    .p-step{
+      padding:14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--border);min-height:96px;
+      display:flex;flex-direction:column;justify-content:space-between
+    }
+    .p-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+    .p-step .name{font-size:13px;font-weight:700}
+    .p-step .status{font-size:11px;color:var(--muted)}
+    .p-step .desc{font-size:12px;color:var(--muted);line-height:1.5}
+    .p-step.pending{opacity:.75}
+    .p-step.running{border-color:rgba(124,156,255,.35);box-shadow:0 0 0 1px rgba(124,156,255,.18) inset}
+    .p-step.done{border-color:rgba(118,247,173,.35)}
+    .p-step.done .status{color:#bcf7d2}
+    .p-step.error{border-color:rgba(255,141,125,.45)}
+    .dashboard{
+      display:grid;grid-template-columns:1.12fr .88fr;gap:18px;margin-top:18px
+    }
+    .summary-cards{
+      display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px
+    }
+    .summary-card{
+      padding:16px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--border)
+    }
+    .summary-card .label{font-size:12px;color:var(--muted)}
+    .summary-card .value{font-size:22px;font-weight:800;margin-top:8px;line-height:1.2}
+    .summary-card .mini{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+    .sector-chips{display:flex;flex-wrap:wrap;gap:10px}
+    .sector-chip{
+      padding:10px 12px;border-radius:14px;background:rgba(94,234,212,.06);border:1px solid rgba(94,234,212,.16);min-width:220px;flex:1
+    }
+    .sector-chip strong{display:block;font-size:13px;margin-bottom:6px}
+    .sector-chip span{font-size:12px;color:var(--muted);line-height:1.5}
+    .table-wrap{overflow:auto}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:12px 10px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top;text-align:left}
+    th{font-size:12px;color:var(--muted);font-weight:600}
+    td{font-size:13px;line-height:1.6}
+    tr.data-row{cursor:pointer;transition:background .15s ease}
+    tr.data-row:hover{background:rgba(255,255,255,.035)}
+    tr.data-row.active{background:rgba(124,156,255,.08)}
+    .pill{
+      display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);font-size:12px
+    }
+    .pill.good{background:rgba(118,247,173,.08);color:#c8ffd7;border-color:rgba(118,247,173,.22)}
+    .pill.mid{background:rgba(255,212,128,.08);color:#ffe5b6;border-color:rgba(255,212,128,.22)}
+    .pill.low{background:rgba(255,141,125,.08);color:#ffd0c8;border-color:rgba(255,141,125,.22)}
+    .muted{color:var(--muted)}
+    .detail-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
+    .detail-title{font-size:28px;font-weight:800;line-height:1.1}
+    .detail-sub{color:var(--muted);font-size:13px;line-height:1.6;margin-top:6px}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    .mini-card{padding:14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--border)}
+    .mini-card h4{margin:0 0 8px;font-size:14px}
+    .mini-card p,.mini-card li{margin:0;color:#d8e3ff;font-size:13px;line-height:1.7}
+    .bars{display:grid;gap:10px;margin-top:10px}
+    .bar-row{display:grid;grid-template-columns:100px 1fr 42px;gap:10px;align-items:center}
+    .bar-row .bar{
+      height:10px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden;position:relative
+    }
+    .bar-row .fill{
+      height:100%;border-radius:999px;background:linear-gradient(90deg, #5eead4, #7c9cff)
+    }
+    .evidence-list{display:grid;gap:12px}
+    .evidence-item{
+      padding:14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--border)
+    }
+    .evidence-item .meta{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px}
+    .evidence-item .meta .type{font-size:11px;color:#baf7ee;border:1px solid rgba(94,234,212,.22);padding:4px 8px;border-radius:999px}
+    .evidence-item .meta .date{font-size:12px;color:var(--muted)}
+    .evidence-item strong{display:block;font-size:14px;margin-bottom:6px}
+    .evidence-item p{margin:0;font-size:13px;line-height:1.6;color:#d8e3ff}
+    .evidence-item .src{margin-top:8px;font-size:12px;color:var(--muted)}
+    .list-block{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .list-chip{
+      padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--border);font-size:12px;color:#d8e3ff
+    }
+    .sources-list{display:grid;gap:10px;max-height:520px;overflow:auto}
+    .source-item{
+      padding:12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--border)
+    }
+    .source-item strong{display:block;font-size:13px;margin-bottom:6px}
+    .source-item .u{font-size:12px;color:var(--muted);word-break:break-all}
+    .ppt-box{
+      width:100%;min-height:220px;background:rgba(255,255,255,.03);border:1px solid var(--border);
+      border-radius:16px;color:var(--text);padding:14px;font-size:13px;line-height:1.8;white-space:pre-wrap
+    }
+    .subtle{
+      color:var(--muted);font-size:12px;line-height:1.7
+    }
+    .compare-table .bar-shell{
+      width:100%;height:8px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden
+    }
+    .compare-table .bar-fill{height:100%;background:linear-gradient(90deg, rgba(94,234,212,.95), rgba(124,156,255,.95))}
+    .footer{
+      margin-top:18px;padding:18px 0 0;color:var(--muted);font-size:12px;line-height:1.8
+    }
+    .toast{
+      position:fixed;right:24px;bottom:24px;z-index:60;
+      padding:14px 16px;border-radius:14px;background:#0e1630;border:1px solid var(--border);box-shadow:var(--shadow);
+      display:none;max-width:420px
+    }
+    .toast.show{display:block}
+    .modal{
+      position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;place-items:center;z-index:70;padding:18px
+    }
+    .modal.show{display:grid}
+    .modal-card{
+      width:min(720px,100%);padding:22px;border-radius:20px;background:linear-gradient(180deg,#10182f,#0b1224);border:1px solid var(--border);box-shadow:var(--shadow)
+    }
+    .modal-card h3{margin:0 0 8px}
+    .modal-card p{margin:0 0 14px;color:var(--muted);font-size:13px;line-height:1.7}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
+    @media (max-width: 1200px){
+      .hero, .duo, .dashboard{grid-template-columns:1fr}
+      .modules-grid{grid-template-columns:1fr 1fr}
+      .summary-cards{grid-template-columns:1fr 1fr}
+      .progress-grid{grid-template-columns:1fr 1fr 1fr}
+    }
+    @media (max-width: 760px){
+      .shell{padding:16px}
+      .hero-grid, .field-row, .summary-cards, .detail-grid, .score-grid{grid-template-columns:1fr}
+      .modules-grid, .progress-grid{grid-template-columns:1fr}
+      .topbar{position:static}
+      .hero-left h2{font-size:30px}
+      .detail-title{font-size:24px}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">PE</div>
+        <div>
+          <h1>一级PE标的发现引擎</h1>
+          <p>AI + Agent · 可复用 · 可解释 · 可动态更新</p>
+        </div>
+      </div>
+      <div class="badges">
+        <div class="badge" id="keyBadge">API Key：未保存</div>
+        <div class="badge" id="modelBadge">模型：gpt-5.4-mini</div>
+        <div class="badge" id="dataBadge">数据状态：等待运行</div>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="card hero-left">
+        <div class="eyebrow">AI + Agent · 一级PE · 机会发现基础设施</div>
+        <h2>把“找方向、找公司、收敛标的”从一次性研究，升级成可复用的组织级能力</h2>
+        <p class="lead">
+          这套系统不是替代投资判断，而是把一级PE中最难被信服的环节——赛道初筛、未上市候选池构建、横向比较、排除逻辑、解释型评分、最终标的推荐——流程化、证据化、可解释化。
+          它的目标不是生成一个好看的结论，而是沉淀一条以后还可以重复运行的<strong>标的发现与筛选工作流</strong>。
+        </p>
+        <div class="hero-grid">
+          <div class="hero-stat">
+            <div class="label">系统定位</div>
+            <div class="value">一级PE标的发现引擎</div>
+          </div>
+          <div class="hero-stat">
+            <div class="label">核心对象</div>
+            <div class="value">未上市候选公司池</div>
+          </div>
+          <div class="hero-stat">
+            <div class="label">方法核心</div>
+            <div class="value">多代理协同 + 解释型评分</div>
+          </div>
+        </div>
+        <div class="hero-tags">
+          <span class="tag">多源异构信息采集</span>
+          <span class="tag">事件抽取与证据归因</span>
+          <span class="tag">实体解析与赛道映射</span>
+          <span class="tag">RAG 检索增强</span>
+          <span class="tag">规则引擎</span>
+          <span class="tag">状态机推进</span>
+          <span class="tag">人机协同审批</span>
+        </div>
+      </div>
+
+      <div class="card control">
+        <h3>今日全量搜索</h3>
+        <div class="sub">保存 API Key 一次即可。后续演示时，直接点击按钮，系统会基于<strong>当天公开信息</strong>完成赛道映射、候选池构建、横向比较、评分与推荐。</div>
+        <div class="field">
+          <label>搜索任务描述</label>
+          <textarea id="brief">请基于今天的公开信息，在通用设备/工业自动化/高端制造相邻交叉领域中，筛选新的一级股权投资方向与未上市公司机会；优先 B 轮前后、产品卡位清晰、具备客户验证、未来具备继续融资或退出可能的公司；上市公司仅作为产业参照和退出映射，不作为本轮一级候选主体。</textarea>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>已覆盖方向（可留空）</label>
+            <input id="excludeDirections" placeholder="例如：半导体真空系统、运动控制底座">
+          </div>
+          <div class="field">
+            <label>已覆盖公司（可留空）</label>
+            <input id="excludeCompanies" placeholder="例如：公司A、公司B">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>研究范围</label>
+            <input id="scope" value="通用设备 / 工业自动化 / 高端制造相邻领域">
+          </div>
+          <div class="field">
+            <label>阶段偏好</label>
+            <input id="stagePref" value="优先B轮前后">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>候选公司数量</label>
+            <select id="maxCompanies">
+              <option value="8">8</option>
+              <option value="10" selected>10</option>
+              <option value="12">12</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>运行模型</label>
+            <select id="runtimeModel">
+              <option value="gpt-5.4-mini" selected>gpt-5.4-mini</option>
+              <option value="gpt-5.4">gpt-5.4</option>
+              <option value="gpt-5">gpt-5</option>
+              <option value="o4-mini">o4-mini</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>限定域名（高级选项，可留空）</label>
+          <textarea id="allowedDomains" style="min-height:62px" placeholder="例如：gov.cn, miit.gov.cn, cninfo.com.cn, hkexnews.hk"></textarea>
+        </div>
+        <div class="actions">
+          <button class="btn-primary" id="runBtn">今日全量搜索</button>
+          <button class="btn-secondary" id="loadLastBtn">读取上次成功结果</button>
+          <button class="btn-secondary" id="loadSampleBtn">载入演示样例</button>
+          <button class="btn-ghost" id="settingsBtn">设置 API Key</button>
+        </div>
+        <div class="note">
+          本地演示模式：API Key 仅保存在当前电脑的本地配置文件中。<strong>正式生产环境应改为服务端代理</strong>，不要将 API Key 暴露在浏览器客户端。
+        </div>
+      </div>
+    </section>
+
+    <section class="section card modules">
+      <div class="section-head">
+        <div>
+          <h3>AI + Agent 系统定位与五大模块</h3>
+          <p>这不是“AI 帮我看项目”的玩具，而是一套把一级PE研究流程化、证据化、可解释化的能力框架。</p>
+        </div>
+      </div>
+      <div class="modules-grid">
+        <div class="module-card">
+          <div class="num">1</div>
+          <h4>信息采集与赛道映射</h4>
+          <p>围绕政策、行业协会、展会发布、公司官网、融资事件、客户验证、招投标、年报/招股书等公开信息进行持续采集，并映射至既有赛道库，识别其属于哪个细分赛道、对应哪条投资主线，以及属于需求催化、技术突破、客户验证还是资本事件。</p>
+        </div>
+        <div class="module-card">
+          <div class="num">2</div>
+          <h4>未上市候选公司池构建</h4>
+          <p>以未上市公司为核心筛选对象，优先纳入处于B轮前后、具备一定客户验证、产品卡位清晰、业务相对聚焦、未来具备继续融资或退出可能的公司；上市公司仅作为产业参照、估值锚和退出映射。</p>
+        </div>
+        <div class="module-card">
+          <div class="num">3</div>
+          <h4>横向比较与排除逻辑生成</h4>
+          <p>围绕公司定位、核心产品、高端属性、客户验证、商业化成熟度、融资阶段、行业地位、退出可行性等维度，对候选公司进行横向比较，并同步生成排除逻辑。系统既回答“为什么选”，也回答“为什么不选”。</p>
+        </div>
+        <div class="module-card">
+          <div class="num">4</div>
+          <h4>解释型评分引擎</h4>
+          <p>针对赛道景气、利润池、高端属性、客户验证、商业化进度、可投性、退出可行性、竞争卡位和信息充分度进行结构化赋分。每一项分数都必须回溯到对应的公开证据，实现可打分、可解释、可复核。</p>
+        </div>
+        <div class="module-card">
+          <div class="num">5</div>
+          <h4>最终标的推荐与动态跟踪</h4>
+          <p>在候选池、横向比较和评分结果基础上，输出当前赛道重点跟踪公司、备选公司和最终推荐标的，并明确推荐理由、核心证据、待核实信息缺口，以及哪些变量变化可能导致推荐切换。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="duo">
+      <div class="card pad">
+        <div class="section-head">
+          <div>
+            <h3>解释型评分引擎</h3>
+            <p>总分不是拍脑袋给，而是由九个维度的结构化等级经过规则引擎换算得到，并叠加排除项惩罚。</p>
+          </div>
+        </div>
+        <div class="formula">
+          总分 = Σ（九维权重 × 维度等级 / 5） − 排除项惩罚
+        </div>
+        <div class="score-grid">
+          <div class="score-item"><div class="row"><span class="name">赛道景气</span><span class="w">12分</span></div><small>政策催化、需求扩张、渗透率提升、产业景气度</small></div>
+          <div class="score-item"><div class="row"><span class="name">利润池</span><span class="w">12分</span></div><small>价值节点位置、议价能力、毛利厚度、后市场厚度</small></div>
+          <div class="score-item"><div class="row"><span class="name">高端属性</span><span class="w">10分</span></div><small>精度、可靠性、认证壁垒、工艺 know-how、替代难度</small></div>
+          <div class="score-item"><div class="row"><span class="name">客户验证</span><span class="w">12分</span></div><small>标杆客户、验证周期、导入深度、复购/复制性</small></div>
+          <div class="score-item"><div class="row"><span class="name">商业化进度</span><span class="w">10分</span></div><small>量产交付、订单转化、渠道与交付体系、规模化能力</small></div>
+          <div class="score-item"><div class="row"><span class="name">可投性</span><span class="w">12分</span></div><small>轮次、股权结构、融资节奏、接触可能性、估值可谈性</small></div>
+          <div class="score-item"><div class="row"><span class="name">退出可行性</span><span class="w">10分</span></div><small>产业买家、IPO可比、并购承接、退出路径清晰度</small></div>
+          <div class="score-item"><div class="row"><span class="name">竞争卡位</span><span class="w">12分</span></div><small>差异化、行业地位、客户心智、平台化延展</small></div>
+          <div class="score-item"><div class="row"><span class="name">信息充分度</span><span class="w">10分</span></div><small>公开证据完整性、交叉验证程度、信息一致性</small></div>
+          <div class="score-item"><div class="row"><span class="name">排除项惩罚</span><span class="w">-5 到 -20</span></div><small>配套功能件型、工程项目型、宽口径拼装型、标准耗材型、独立客户入口弱、利润池过薄、退出锚缺失等</small></div>
+        </div>
+        <div class="note">系统同时将九维评分自动映射为三层结果：<strong>静态判断层</strong>（赛道景气/利润池/高端属性/竞争卡位）、<strong>动态证据层</strong>（客户验证/商业化进度/信息充分度）、<strong>交易退出层</strong>（可投性/退出可行性）。</div>
+      </div>
+
+      <div class="card pad">
+        <div class="section-head">
+          <div>
+            <h3>Agent / Skill 架构</h3>
+            <p>不是单轮 Prompt，而是多代理协同、技能封装、规则约束、状态机推进的研究工作台。</p>
+          </div>
+        </div>
+        <div class="arch-list">
+          <div class="arch-step">
+            <div class="icon">A1</div>
+            <div><strong>Signal Harvester · 情报采集代理</strong><span>多源异构公开信息接入：政策、协会、展会、官网、融资、招投标、年报/招股书、客户验证、招聘动态。</span></div>
+          </div>
+          <div class="arch-step">
+            <div class="icon">A2</div>
+            <div><strong>Sector Mapper · 赛道映射代理</strong><span>对事件进行赛道识别、投资主线归类、价值节点映射，形成候选方向列表。</span></div>
+          </div>
+          <div class="arch-step">
+            <div class="icon">A3</div>
+            <div><strong>Company Pool Builder · 候选池构建代理</strong><span>围绕未上市主体构建候选公司池，上市公司仅用于估值锚、产业参照与退出映射。</span></div>
+          </div>
+          <div class="arch-step">
+            <div class="icon">A4</div>
+            <div><strong>Compare & Exclude · 横向比较代理</strong><span>输出“为什么选它 / 为什么不选别人 / 为什么排除”的完整横向比较与排除逻辑。</span></div>
+          </div>
+          <div class="arch-step">
+            <div class="icon">A5</div>
+            <div><strong>Explainable Scoring Engine · 解释型评分引擎</strong><span>由模型输出九维等级，再由本地规则引擎做确定性换算，避免“模型直接拍总分”。</span></div>
+          </div>
+          <div class="arch-step">
+            <div class="icon">A6</div>
+            <div><strong>Tracking State Machine · 动态跟踪代理</strong><span>将结果推进到“观察 / 补证 / 约访 / 深跟 / 立项 / 放弃”的状态机，并生成下一步动作建议。</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section card runtime">
+      <div class="section-head">
+        <div>
+          <h3>实时运行状态</h3>
+          <p>点击“今日全量搜索”后，系统会按模块顺序执行：采集 → 映射 → 构池 → 比较 → 评分 → 推荐。</p>
+        </div>
+      </div>
+      <div class="progress-grid" id="progressGrid"></div>
+    </section>
+
+    <section class="dashboard">
+      <div>
+        <div class="summary-cards" id="summaryCards"></div>
+
+        <div class="card pad">
+          <div class="section-head">
+            <div>
+              <h3>今日优先关注赛道</h3>
+              <p>系统根据候选公司池、赛道映射与公开证据强度自动生成。</p>
+            </div>
+          </div>
+          <div class="sector-chips" id="sectorChips"></div>
+        </div>
+
+        <div class="card pad section">
+          <div class="section-head">
+            <div>
+              <h3>未上市候选公司池</h3>
+              <p>点击某一行，可在右侧查看该公司的横向比较、评分拆解、证据列表与下一步动作。</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:70px;">排名</th>
+                  <th style="width:180px;">公司</th>
+                  <th>赛道 / 价值节点</th>
+                  <th style="width:120px;">阶段</th>
+                  <th style="width:120px;">总分</th>
+                  <th style="width:150px;">推荐级别</th>
+                  <th>为什么选</th>
+                  <th>为什么不选别人</th>
+                </tr>
+              </thead>
+              <tbody id="companyTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card pad section">
+          <div class="section-head">
+            <div>
+              <h3>横向比较矩阵</h3>
+              <p>系统会对当前 Top5 候选公司进行横向比较，以提升“为什么选 / 为什么不选”的完整性与说服力。</p>
+            </div>
+          </div>
+          <div id="comparisonWrap"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card pad" id="detailPanel">
+          <div class="section-head">
+            <div>
+              <h3>项目详情</h3>
+              <p>暂无选中公司</p>
+            </div>
+          </div>
+          <div class="subtle">点击左侧候选公司池中的任意一行，即可查看详细的解释型评分、证据列表、风险与下一步动作。</div>
+        </div>
+
+        <div class="card pad section">
+          <div class="section-head">
+            <div>
+              <h3>公开来源</h3>
+              <p>系统会尽量展示本次检索使用到的公开来源，便于答辩时说明“证据来自哪里”。</p>
+            </div>
+          </div>
+          <div class="sources-list" id="sourcesList"></div>
+        </div>
+
+        <div class="card pad section">
+          <div class="section-head">
+            <div>
+              <h3>PPT口径生成</h3>
+              <p>自动把当前结果压缩成可直接贴入 PPT 的说明文字。</p>
+            </div>
+            <div>
+              <button class="btn-secondary" id="copyNarrativeBtn">复制口径</button>
+            </div>
+          </div>
+          <div class="ppt-box" id="pptBox"></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">
+      说明：本工作台用于本地演示与答辩展示。OpenAI 官方文档明确提醒：API Key 属于密钥，不应暴露在浏览器客户端；正式环境应改为服务端代理。本版本将 Key 保存在当前电脑本地配置文件中，仅用于个人本机演示。实时搜索能力依赖 Responses API 与 web search 工具；若现场网络不稳，可优先读取上次成功结果或演示样例。
+    </div>
+  </div>
+
+  <div class="modal" id="settingsModal">
+    <div class="modal-card">
+      <h3>设置 API Key</h3>
+      <p>只需输入一次。保存后，系统会将配置写入当前电脑本地文件，后续演示不需要重复输入。正式生产环境建议改为服务端代理，而不是在本地配置明文保存。</p>
+      <div class="field">
+        <label>OpenAI API Key</label>
+        <input id="apiKeyInput" type="password" placeholder="sk-..." autocomplete="off">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Organization（可留空）</label>
+          <input id="orgInput" placeholder="org_...">
+        </div>
+        <div class="field">
+          <label>Project（可留空）</label>
+          <input id="projectInput" placeholder="proj_...">
+        </div>
+      </div>
+      <div class="field">
+        <label>默认模型</label>
+        <select id="modelInput">
+          <option value="gpt-5.4-mini" selected>gpt-5.4-mini</option>
+          <option value="gpt-5.4">gpt-5.4</option>
+          <option value="gpt-5">gpt-5</option>
+          <option value="o4-mini">o4-mini</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="clearConfigBtn">清除本地配置</button>
+        <button class="btn-secondary" id="closeModalBtn">关闭</button>
+        <button class="btn-primary" id="saveConfigBtn">保存配置</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const state = {
+      config: null,
+      report: null,
+      selectedIndex: 0,
+      progressTimer: null,
+      progressSteps: [
+        { name: "公开源采集", desc: "采集政策、协会、展会、官网、融资与招投标信息。" },
+        { name: "赛道映射", desc: "完成事件分类、赛道归属与投资主线映射。" },
+        { name: "候选池构建", desc: "优先构建未上市公司候选池，上市公司仅作参照。" },
+        { name: "横向比较", desc: "输出“为什么选 / 为什么不选 / 为什么排除”逻辑。" },
+        { name: "评分引擎", desc: "九维解释型评分 + 排除项惩罚换算总分。" },
+        { name: "推荐输出", desc: "生成重点跟踪公司、备选公司与最终推荐标的。" }
+      ],
+      progressState: []
+    };
+
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+    function toast(msg, isError = false){
+      const el = $('#toast');
+      el.textContent = msg;
+      el.style.borderColor = isError ? 'rgba(255,141,125,.4)' : 'rgba(94,234,212,.24)';
+      el.classList.add('show');
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => el.classList.remove('show'), 3200);
+    }
+
+    async function apiGet(url){
+      const resp = await fetch(url, { cache: 'no-store' });
+      if(!resp.ok) throw new Error(await resp.text());
+      return resp.json();
+    }
+
+    async function apiPost(url, body){
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body || {})
+      });
+      const data = await resp.json().catch(() => ({}));
+      if(!resp.ok || data.ok === false){
+        throw new Error(data.error || ('请求失败：' + resp.status));
+      }
+      return data;
+    }
+
+    function setLoading(loading){
+      $('#runBtn').disabled = loading;
+      $('#runBtn').textContent = loading ? '正在搜索…' : '今日全量搜索';
+    }
+
+    function openModal(){ $('#settingsModal').classList.add('show'); }
+    function closeModal(){ $('#settingsModal').classList.remove('show'); }
+
+    function renderProgress(){
+      const wrap = $('#progressGrid');
+      wrap.innerHTML = '';
+      state.progressSteps.forEach((step, idx) => {
+        const s = state.progressState[idx] || 'pending';
+        const statusText = s === 'running' ? '执行中' : s === 'done' ? '已完成' : s === 'error' ? '失败' : '待执行';
+        const div = document.createElement('div');
+        div.className = 'p-step ' + s;
+        div.innerHTML = `
+          <div class="p-top">
+            <div class="name">${idx+1}. ${step.name}</div>
+            <div class="status">${statusText}</div>
+          </div>
+          <div class="desc">${step.desc}</div>
+        `;
+        wrap.appendChild(div);
+      });
+    }
+
+    function resetProgress(){
+      state.progressState = state.progressSteps.map(() => 'pending');
+      renderProgress();
+    }
+
+    function startProgress(){
+      resetProgress();
+      let i = 0;
+      clearInterval(state.progressTimer);
+      state.progressTimer = setInterval(() => {
+        for(let j=0;j<state.progressState.length;j++){
+          if(j < i) state.progressState[j] = 'done';
+          else if(j === i) state.progressState[j] = 'running';
+          else state.progressState[j] = 'pending';
+        }
+        renderProgress();
+        if(i < state.progressState.length - 1) i += 1;
+      }, 900);
+    }
+
+    function finishProgress(ok = true){
+      clearInterval(state.progressTimer);
+      state.progressState = state.progressSteps.map((_, idx) => ok ? 'done' : (idx === state.progressSteps.length - 1 ? 'error' : 'done'));
+      renderProgress();
+    }
+
+    function escapeHtml(s){
+      return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function pickPill(score){
+      if(score >= 80) return ['pill good', '重点推进'];
+      if(score >= 70) return ['pill good', '深跟候选'];
+      if(score >= 60) return ['pill mid', '重点观察'];
+      if(score >= 45) return ['pill mid', '补证池'];
+      return ['pill low', '低优先级'];
+    }
+
+    function renderSummary(report){
+      const meta = report.meta || {};
+      const finalRec = report.final_recommendation || {};
+      const topCompany = finalRec.recommended_company || (report.candidate_companies?.[0]?.name || '—');
+      const topSector = report.top_sectors?.[0]?.sector || report.sector_rank?.[0]?.sector || '—';
+      const count = report.candidate_companies?.length || 0;
+      const sourceCount = report.sources?.length || meta.key_source_count || 0;
+      const cards = [
+        {label:'今日优先赛道', value: topSector, mini: meta.headline || '基于今日公开信息自动生成'},
+        {label:'首选推荐公司', value: topCompany, mini: finalRec.recommendation_logic || '由候选池、横向比较与评分共同收敛'},
+        {label:'未上市候选池', value: String(count), mini: '系统优先围绕未上市主体构建可比较公司池'},
+        {label:'公开来源数量', value: String(sourceCount), mini: `运行时间：${meta.generated_at || '—'}`}
+      ];
+      $('#summaryCards').innerHTML = cards.map(c => `
+        <div class="summary-card">
+          <div class="label">${escapeHtml(c.label)}</div>
+          <div class="value">${escapeHtml(c.value)}</div>
+          <div class="mini">${escapeHtml(c.mini)}</div>
+        </div>
+      `).join('');
+      $('#dataBadge').textContent = `数据状态：${meta.run_source === 'live' ? '已完成今日搜索' : '已载入缓存/样例'}`;
+    }
+
+    function renderSectors(report){
+      const items = report.top_sectors || [];
+      const wrap = $('#sectorChips');
+      if(!items.length){
+        wrap.innerHTML = '<div class="subtle">暂无赛道输出。请先运行搜索。</div>';
+        return;
+      }
+      wrap.innerHTML = items.map(item => `
+        <div class="sector-chip">
+          <strong>${escapeHtml(item.sector)}</strong>
+          <span><b>主线：</b>${escapeHtml(item.investment_mainline)}<br><b>信号类型：</b>${escapeHtml(item.signal_type)}<br><b>Why now：</b>${escapeHtml(item.why_now)}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderTable(report){
+      const tbody = $('#companyTableBody');
+      const items = report.candidate_companies || [];
+      if(!items.length){
+        tbody.innerHTML = '<tr><td colspan="8" class="muted">暂无候选公司。请先运行搜索。</td></tr>';
+        return;
+      }
+      tbody.innerHTML = items.map((item, idx) => {
+        const score = item._computed?.total_score || 0;
+        const [pillClass, pillText] = pickPill(score);
+        return `
+          <tr class="data-row ${idx === state.selectedIndex ? 'active':''}" data-idx="${idx}">
+            <td>#${idx+1}</td>
+            <td><strong>${escapeHtml(item.name)}</strong><div class="muted">${escapeHtml(item.location || '')}</div></td>
+            <td>${escapeHtml(item.sector)}<div class="muted">${escapeHtml(item.value_node)}</div></td>
+            <td>${escapeHtml(item.tracking_stage || item.stage || '—')}</td>
+            <td><strong>${score.toFixed(1)}</strong></td>
+            <td><span class="${pillClass}">${pillText}</span></td>
+            <td>${escapeHtml(item.main_recommendation_reason || '—')}</td>
+            <td>${escapeHtml(item.why_not_others || '—')}</td>
+          </tr>
+        `;
+      }).join('');
+      $$('#companyTableBody .data-row').forEach(row => {
+        row.addEventListener('click', () => {
+          state.selectedIndex = Number(row.dataset.idx || 0);
+          renderTable(report);
+          renderDetail(report);
+        });
+      });
+    }
+
+    function renderComparison(report){
+      const items = (report.candidate_companies || []).slice(0,5);
+      const wrap = $('#comparisonWrap');
+      if(!items.length){
+        wrap.innerHTML = '<div class="subtle">暂无可比较样本。</div>';
+        return;
+      }
+      wrap.innerHTML = `
+        <div class="table-wrap compare-table">
+          <table>
+            <thead>
+              <tr>
+                <th>公司</th>
+                <th>总分</th>
+                <th>静态判断</th>
+                <th>动态证据</th>
+                <th>交易退出</th>
+                <th>排除项</th>
+                <th>跟踪阶段</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${items.map(item => {
+                const c = item._computed || {};
+                return `
+                  <tr>
+                    <td><strong>${escapeHtml(item.name)}</strong><div class="muted">${escapeHtml(item.sector)}</div></td>
+                    <td>${(c.total_score || 0).toFixed(1)}</td>
+                    <td>
+                      ${(c.static_score || 0).toFixed(1)}
+                      <div class="bar-shell"><div class="bar-fill" style="width:${Math.min(100, (c.static_score || 0) / 46 * 100)}%"></div></div>
+                    </td>
+                    <td>
+                      ${(c.dynamic_score || 0).toFixed(1)}
+                      <div class="bar-shell"><div class="bar-fill" style="width:${Math.min(100, (c.dynamic_score || 0) / 32 * 100)}%"></div></div>
+                    </td>
+                    <td>
+                      ${(c.deal_score || 0).toFixed(1)}
+                      <div class="bar-shell"><div class="bar-fill" style="width:${Math.min(100, (c.deal_score || 0) / 22 * 100)}%"></div></div>
+                    </td>
+                    <td>${(c.penalty || 0) ? '-' + c.penalty : '—'}</td>
+                    <td>${escapeHtml(item.tracking_stage || '—')}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function listChips(arr){
+      if(!arr || !arr.length) return '<span class="subtle">暂无</span>';
+      return `<div class="list-block">${arr.map(x => `<span class="list-chip">${escapeHtml(x)}</span>`).join('')}</div>`;
+    }
+
+    function renderDetail(report){
+      const item = report.candidate_companies?.[state.selectedIndex];
+      const panel = $('#detailPanel');
+      if(!item){
+        panel.innerHTML = `<div class="section-head"><div><h3>项目详情</h3><p>暂无选中公司</p></div></div><div class="subtle">点击左侧候选公司池中的任意一行，即可查看详细信息。</div>`;
+        return;
+      }
+      const c = item._computed || {};
+      const scoreRows = Object.entries(report.dimension_labels || {}).map(([key, label]) => {
+        const raw = item.score_levels?.[key] ?? 0;
+        const weighted = c.dimension_scores?.[key] ?? 0;
+        return `
+          <div class="bar-row">
+            <div>${escapeHtml(label)}</div>
+            <div class="bar"><div class="fill" style="width:${Math.min(100, raw/5*100)}%"></div></div>
+            <div style="text-align:right">${weighted.toFixed(1)}</div>
+          </div>
+        `;
+      }).join('');
+      const evidenceHtml = (item.evidence || []).length ? item.evidence.map(ev => `
+        <div class="evidence-item">
+          <div class="meta">
+            <span class="type">${escapeHtml(ev.event_type)}</span>
+            <span class="date">${escapeHtml(ev.date)}</span>
+          </div>
+          <strong>${escapeHtml(ev.title)}</strong>
+          <p>${escapeHtml(ev.summary)}</p>
+          <div class="src">来源：${escapeHtml(ev.source_domain)} · <a href="${escapeHtml(ev.source_url)}" target="_blank" rel="noopener">打开原文</a></div>
+        </div>
+      `).join('') : '<div class="subtle">暂无证据列表。</div>';
+
+      const [pillClass, pillText] = pickPill(c.total_score || 0);
+      panel.innerHTML = `
+        <div class="detail-head">
+          <div>
+            <div class="detail-title">${escapeHtml(item.name)}</div>
+            <div class="detail-sub">${escapeHtml(item.sector)} · ${escapeHtml(item.value_node)} · ${escapeHtml(item.location || '')} · ${escapeHtml(item.listed_status || '')}</div>
+          </div>
+          <div style="text-align:right">
+            <div class="${pillClass}">${pillText}</div>
+            <div style="font-size:34px;font-weight:800;margin-top:8px">${(c.total_score || 0).toFixed(1)}</div>
+          </div>
+        </div>
+
+        <div class="detail-grid">
+          <div class="mini-card">
+            <h4>核心判断</h4>
+            <p>${escapeHtml(item.main_recommendation_reason || '—')}</p>
+          </div>
+          <div class="mini-card">
+            <h4>为什么选它而不是别人</h4>
+            <p>${escapeHtml(item.why_selected_over_peers || item.why_not_others || '—')}</p>
+          </div>
+          <div class="mini-card">
+            <h4>为什么不选其他候选</h4>
+            <p>${escapeHtml(item.why_not_others || '—')}</p>
+          </div>
+          <div class="mini-card">
+            <h4>排除/切换逻辑</h4>
+            <p>${escapeHtml(item.exclusion_logic || '—')}</p>
+          </div>
+        </div>
+
+        <div class="section" style="margin-top:16px">
+          <div class="section-head">
+            <div>
+              <h3 style="font-size:18px;margin:0">解释型评分拆解</h3>
+              <p>九维等级由模型输出，本地规则引擎做确定性换算。</p>
+            </div>
+          </div>
+          <div class="bars">${scoreRows}</div>
+          <div class="detail-grid" style="margin-top:14px">
+            <div class="mini-card"><h4>静态判断层</h4><p>${(c.static_score || 0).toFixed(1)} 分</p></div>
+            <div class="mini-card"><h4>动态证据层</h4><p>${(c.dynamic_score || 0).toFixed(1)} 分</p></div>
+            <div class="mini-card"><h4>交易退出层</h4><p>${(c.deal_score || 0).toFixed(1)} 分</p></div>
+            <div class="mini-card"><h4>排除项惩罚</h4><p>${(c.penalty || 0) ? '-' + c.penalty + ' 分' : '无'}</p></div>
+          </div>
+        </div>
+
+        <div class="detail-grid" style="margin-top:16px">
+          <div class="mini-card">
+            <h4>投资主张</h4>
+            <p>${escapeHtml(item.investment_thesis || '—')}</p>
+          </div>
+          <div class="mini-card">
+            <h4>下一步动作</h4>
+            <p>${escapeHtml(item.next_action || '—')}</p>
+          </div>
+        </div>
+
+        <div class="detail-grid" style="margin-top:12px">
+          <div class="mini-card">
+            <h4>核心风险</h4>
+            ${listChips(item.core_risks)}
+          </div>
+          <div class="mini-card">
+            <h4>信息缺口</h4>
+            ${listChips(item.info_gaps)}
+          </div>
+          <div class="mini-card">
+            <h4>推荐切换变量</h4>
+            ${listChips(item.switch_variables)}
+          </div>
+          <div class="mini-card">
+            <h4>排除标签</h4>
+            ${listChips(item.exclusion_tags)}
+          </div>
+        </div>
+
+        <div class="section" style="margin-top:16px">
+          <div class="section-head">
+            <div>
+              <h3 style="font-size:18px;margin:0">公开证据列表</h3>
+              <p>每一项判断都尽量回到具体公开证据。</p>
+            </div>
+          </div>
+          <div class="evidence-list">${evidenceHtml}</div>
+        </div>
+      `;
+    }
+
+    function renderSources(report){
+      const items = report.sources || [];
+      const wrap = $('#sourcesList');
+      if(!items.length){
+        wrap.innerHTML = '<div class="subtle">本次结果未返回完整来源列表。你仍可通过公司详情中的证据链接回到具体公开网页。</div>';
+        return;
+      }
+      wrap.innerHTML = items.map(item => `
+        <div class="source-item">
+          <strong>${escapeHtml(item.title || item.url)}</strong>
+          <div class="u">${escapeHtml(item.domain || '')}</div>
+          <div class="u"><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">${escapeHtml(item.url)}</a></div>
+        </div>
+      `).join('');
+    }
+
+    function renderNarrative(report){
+      const finalRec = report.final_recommendation || {};
+      const topSectors = (report.top_sectors || []).slice(0,3).map(x => x.sector).join('、') || '待生成';
+      const topCompany = finalRec.recommended_company || report.candidate_companies?.[0]?.name || '待生成';
+      const backups = (finalRec.backup_companies || []).join('、') || '无';
+      const candidateCount = report.candidate_companies?.length || 0;
+      const meta = report.meta || {};
+      const narrative = finalRec.summary_for_ppt || `
+本系统以研究先验为约束，以动态证据流为输入，将一级PE中最难被信服的环节——从赛道初筛、未上市候选池构建、横向比较、排除逻辑到最终标的收敛——流程化、证据化、可解释化。系统通过多代理协同完成公开信息采集、赛道映射、候选池构建、横向比较与解释型评分，并将总分拆解为九个可追溯维度，形成可打分、可解释、可复核的研究闭环。当前基于${meta.run_source === 'live' ? '今日实时' : '缓存/样例'}公开信息，共输出 ${candidateCount} 家候选公司；优先关注赛道为：${topSectors}；首选推荐公司为：${topCompany}；备选公司包括：${backups}。`;
+      $('#pptBox').textContent = narrative;
+    }
+
+    function renderReport(report){
+      state.report = report;
+      if(!report) return;
+      if((report.candidate_companies || []).length){
+        state.selectedIndex = Math.min(state.selectedIndex, report.candidate_companies.length - 1);
+      } else {
+        state.selectedIndex = 0;
+      }
+      renderSummary(report);
+      renderSectors(report);
+      renderTable(report);
+      renderComparison(report);
+      renderDetail(report);
+      renderSources(report);
+      renderNarrative(report);
+    }
+
+    async function loadConfig(){
+      try{
+        const data = await apiGet('/api/config');
+        state.config = data;
+        $('#keyBadge').textContent = 'API Key：' + (data.has_key ? data.api_key_masked : '未保存');
+        $('#modelBadge').textContent = '模型：' + (data.model || 'gpt-5.4-mini');
+        $('#runtimeModel').value = data.model || 'gpt-5.4-mini';
+        $('#modelInput').value = data.model || 'gpt-5.4-mini';
+        $('#orgInput').value = data.organization || '';
+        $('#projectInput').value = data.project || '';
+      }catch(err){
+        toast('读取配置失败：' + err.message, true);
+      }
+    }
+
+    async function loadLastOrSample(){
+      try{
+        const data = await apiGet('/api/last-or-sample');
+        renderReport(data.report);
+        $('#dataBadge').textContent = `数据状态：已载入${data.source === 'last' ? '上次成功结果' : data.source === 'sample' ? '演示样例' : '空白状态'}`;
+      }catch(err){
+        toast('载入数据失败：' + err.message, true);
+      }
+    }
+
+    async function runLive(){
+      if(!state.config?.has_key){
+        openModal();
+        toast('请先保存 API Key。', true);
+        return;
+      }
+      const body = {
+        brief: $('#brief').value.trim(),
+        exclude_directions: $('#excludeDirections').value.trim(),
+        exclude_companies: $('#excludeCompanies').value.trim(),
+        scope: $('#scope').value.trim(),
+        stage_pref: $('#stagePref').value.trim(),
+        geography: '中国',
+        max_companies: Number($('#maxCompanies').value || 10),
+        model: $('#runtimeModel').value,
+        allowed_domains: $('#allowedDomains').value.trim()
+      };
+      setLoading(true);
+      startProgress();
+      try{
+        const data = await apiPost('/api/run', body);
+        finishProgress(true);
+        renderReport(data.report);
+        toast('今日搜索完成。');
+      }catch(err){
+        finishProgress(false);
+        toast(err.message || '搜索失败', true);
+      }finally{
+        setLoading(false);
+        await loadConfig();
+      }
+    }
+
+    async function saveConfig(){
+      try{
+        const payload = {
+          api_key: $('#apiKeyInput').value.trim(),
+          organization: $('#orgInput').value.trim(),
+          project: $('#projectInput').value.trim(),
+          model: $('#modelInput').value
+        };
+        const data = await apiPost('/api/save-config', payload);
+        closeModal();
+        $('#apiKeyInput').value = '';
+        await loadConfig();
+        toast('配置已保存。');
+      }catch(err){
+        toast('保存失败：' + err.message, true);
+      }
+    }
+
+    async function clearConfig(){
+      if(!confirm('确认清除本地配置与已保存的 API Key 吗？')) return;
+      try{
+        await apiPost('/api/clear-config', {});
+        await loadConfig();
+        toast('本地配置已清除。');
+      }catch(err){
+        toast('清除失败：' + err.message, true);
+      }
+    }
+
+    function copyNarrative(){
+      const text = $('#pptBox').textContent || '';
+      navigator.clipboard.writeText(text).then(() => toast('PPT口径已复制。')).catch(() => toast('复制失败，请手动复制。', true));
+    }
+
+    function bindEvents(){
+      $('#runBtn').addEventListener('click', runLive);
+      $('#loadLastBtn').addEventListener('click', loadLastOrSample);
+      $('#loadSampleBtn').addEventListener('click', async () => {
+        try{
+          const data = await apiGet('/api/sample');
+          renderReport(data.report);
+          toast('已载入演示样例。');
+        }catch(err){
+          toast('载入样例失败：' + err.message, true);
+        }
+      });
+      $('#settingsBtn').addEventListener('click', openModal);
+      $('#closeModalBtn').addEventListener('click', closeModal);
+      $('#saveConfigBtn').addEventListener('click', saveConfig);
+      $('#clearConfigBtn').addEventListener('click', clearConfig);
+      $('#copyNarrativeBtn').addEventListener('click', copyNarrative);
+      $('#runtimeModel').addEventListener('change', () => $('#modelBadge').textContent = '模型：' + $('#runtimeModel').value);
+      $('#settingsModal').addEventListener('click', (e) => { if(e.target.id === 'settingsModal') closeModal(); });
+    }
+
+    async function init(){
+      bindEvents();
+      resetProgress();
+      await loadConfig();
+      await loadLastOrSample();
+    }
+
+    init();
+  </script>
+</body>
+</html>

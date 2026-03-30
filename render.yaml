@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: pe-online-workbench
+    runtime: python
+    plan: starter
+    region: singapore
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    healthCheckPath: /health
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 10
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.10
+      - key: DATA_DIR
+        value: /var/data
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: APP_SECRET_KEY
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4.1
+      - key: OPENAI_BASE_URL
+        value: https://api.openai.com/v1
