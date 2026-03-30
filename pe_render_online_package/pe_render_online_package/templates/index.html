@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>一级PE在线项目工作台</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">公开只读 · 管理员可刷新 · 最近一次成功结果优先展示</div>
+        <h1>一级PE在线项目工作台</h1>
+        <p id="headline" class="subline">加载中…</p>
+      </div>
+      <div class="top-actions">
+        <button id="openLoginBtn" class="btn ghost">管理员登录</button>
+        <button id="openAdminBtn" class="btn primary hidden">控制台</button>
+      </div>
+    </header>
+
+    <section class="hero-grid">
+      <div class="metric-card">
+        <div class="metric-label">今日优先关注赛道</div>
+        <div class="metric-value" id="topSectorValue">--</div>
+        <div class="metric-note" id="topSectorNote">--</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">当前首选标的</div>
+        <div class="metric-value" id="topCompanyValue">--</div>
+        <div class="metric-note" id="topCompanyNote">--</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">候选公司数量</div>
+        <div class="metric-value" id="candidateCountValue">--</div>
+        <div class="metric-note" id="candidateCountNote">--</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">最近成功更新</div>
+        <div class="metric-value" id="savedAtValue">--</div>
+        <div class="metric-note" id="savedAtNote">--</div>
+      </div>
+    </section>
+
+    <section class="panel intro-panel">
+      <div class="panel-head">
+        <h2>AI + Agent 系统定位</h2>
+        <span class="badge" id="sourceBadge">缓存结果</span>
+      </div>
+      <p id="systemPositioningText" class="lead"></p>
+      <div class="module-grid" id="moduleGrid"></div>
+    </section>
+
+    <section class="two-col">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>今日输出</h2>
+          <div class="mini-note" id="methodSummary"></div>
+        </div>
+        <div id="sectorCards" class="sector-cards"></div>
+        <div class="ppt-box">
+          <div class="ppt-title">汇报口径</div>
+          <div id="pptSummary"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>最终推荐与备选</h2>
+        </div>
+        <div id="finalRecommendationBox"></div>
+      </div>
+    </section>
+
+    <section class="two-col wide-right">
+      <div class="panel">
+        <div class="panel-head sticky-head">
+          <h2>一级候选公司池</h2>
+          <input id="companySearch" class="search-input" placeholder="搜索公司 / 赛道 / 阶段">
+        </div>
+        <div class="table-wrap">
+          <table class="company-table">
+            <thead>
+              <tr>
+                <th>公司</th>
+                <th>赛道</th>
+                <th>阶段</th>
+                <th>优先级</th>
+                <th>当前阶段</th>
+                <th>推荐理由</th>
+              </tr>
+            </thead>
+            <tbody id="companyTbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel detail-panel">
+        <div class="panel-head">
+          <h2>公司详情</h2>
+          <div id="detailTag" class="badge">未选择</div>
+        </div>
+        <div id="detailEmpty" class="empty-state">点击左侧公司行查看解释型评分、证据、排除逻辑与下一步动作。</div>
+        <div id="detailContent" class="hidden">
+          <div class="detail-title-row">
+            <div>
+              <h3 id="detailName"></h3>
+              <div id="detailSubtitle" class="mini-note"></div>
+            </div>
+            <div class="score-chip">
+              <div class="score-num" id="detailScore"></div>
+              <div class="score-label">优先级</div>
+            </div>
+          </div>
+          <div class="detail-block">
+            <div class="detail-label">投资主线</div>
+            <div id="detailThesis"></div>
+          </div>
+          <div class="detail-grid-2">
+            <div class="detail-block">
+              <div class="detail-label">为什么选</div>
+              <div id="detailWhySelected"></div>
+            </div>
+            <div class="detail-block">
+              <div class="detail-label">为什么不选其他候选</div>
+              <div id="detailWhyNotOthers"></div>
+            </div>
+          </div>
+          <div class="detail-grid-2">
+            <div class="detail-block">
+              <div class="detail-label">排除逻辑</div>
+              <div id="detailExclusion"></div>
+            </div>
+            <div class="detail-block">
+              <div class="detail-label">下一步动作</div>
+              <div id="detailNextAction"></div>
+            </div>
+          </div>
+          <div class="detail-block">
+            <div class="detail-label">解释型评分</div>
+            <div id="scoreBars"></div>
+          </div>
+          <div class="detail-grid-2">
+            <div class="detail-block">
+              <div class="detail-label">待补证据</div>
+              <ul id="detailGaps"></ul>
+            </div>
+            <div class="detail-block">
+              <div class="detail-label">推荐切换触发变量</div>
+              <ul id="detailSwitch"></ul>
+            </div>
+          </div>
+          <div class="detail-block">
+            <div class="detail-label">核心公开证据</div>
+            <div id="detailEvidence"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="two-col">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>横向比较与排除逻辑</h2>
+        </div>
+        <div id="comparisonCards" class="comparison-grid"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>解释型评分引擎</h2>
+        </div>
+        <div class="formula-box">
+          <div class="formula-title">内部优先级口径</div>
+          <div class="formula-text">总分 = 维度加权评分之和 − 排除项惩罚</div>
+          <div class="formula-sub">外部展示不直接暴露内部权重，但每个维度均有固定判断口径与可追溯公开证据。</div>
+        </div>
+        <div id="scoreGuideTable"></div>
+        <div id="internalWeightBox" class="hidden internal-box"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>公开证据宇宙</h2>
+      </div>
+      <div class="evidence-summary" id="sourceSummary"></div>
+      <div id="sourceList" class="source-list"></div>
+    </section>
+  </div>
+
+  <div id="loginModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>管理员登录</h3>
+        <button class="icon-btn" data-close="loginModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="field-label">管理员密码</label>
+        <input id="loginPassword" type="password" class="text-input" placeholder="输入 Render 中设置的 ADMIN_PASSWORD">
+        <button id="loginBtn" class="btn primary full">登录</button>
+        <div id="loginMsg" class="msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminDrawer" class="drawer hidden">
+    <div class="drawer-panel">
+      <div class="drawer-head">
+        <h3>管理员控制台</h3>
+        <div class="drawer-actions">
+          <button id="showWeightsBtn" class="btn ghost">显示内部权重</button>
+          <button id="logoutBtn" class="btn ghost">退出</button>
+          <button class="icon-btn" data-close="adminDrawer">✕</button>
+        </div>
+      </div>
+      <div class="drawer-body">
+        <div class="status-strip">
+          <div>当前 Key 来源：<strong id="keySourceText">--</strong></div>
+          <div>当前 Key 摘要：<strong id="keyMaskText">--</strong></div>
+        </div>
+        <div class="form-grid">
+          <div>
+            <label class="field-label">研究范围 / 赛道库</label>
+            <textarea id="settingScope" class="text-area"></textarea>
+          </div>
+          <div>
+            <label class="field-label">投资任务说明</label>
+            <textarea id="settingBrief" class="text-area"></textarea>
+          </div>
+          <div>
+            <label class="field-label">阶段偏好</label>
+            <textarea id="settingStagePref" class="text-area small"></textarea>
+          </div>
+          <div>
+            <label class="field-label">地域</label>
+            <input id="settingGeography" class="text-input">
+          </div>
+          <div>
+            <label class="field-label">候选公司数量</label>
+            <input id="settingMaxCompanies" type="number" min="4" max="15" class="text-input">
+          </div>
+          <div>
+            <label class="field-label">模型</label>
+            <input id="settingModel" class="text-input" placeholder="例如 gpt-4.1">
+          </div>
+          <div>
+            <label class="field-label">允许搜索的域名（可选）</label>
+            <textarea id="settingAllowedDomains" class="text-area small" placeholder="逗号分隔，例如官网、行业协会、展会主办方"></textarea>
+          </div>
+          <div>
+            <label class="field-label">OpenAI / 代理 Responses 地址</label>
+            <input id="settingBaseUrl" class="text-input" placeholder="默认 https://api.openai.com/v1">
+          </div>
+          <div>
+            <label class="field-label">排除方向</label>
+            <textarea id="settingExcludeDirections" class="text-area small"></textarea>
+          </div>
+          <div>
+            <label class="field-label">排除公司</label>
+            <textarea id="settingExcludeCompanies" class="text-area small"></textarea>
+          </div>
+          <div>
+            <label class="field-label">一次性保存 API Key（可选）</label>
+            <input id="settingApiKey" type="password" class="text-input" placeholder="不填则沿用 Render 环境变量 OPENAI_API_KEY">
+          </div>
+          <div>
+            <label class="field-label">公开页说明</label>
+            <textarea id="settingAdminNote" class="text-area small"></textarea>
+          </div>
+        </div>
+        <div class="drawer-button-row">
+          <button id="saveSettingsBtn" class="btn ghost">保存设置</button>
+          <button id="refreshBtn" class="btn primary">立即更新</button>
+          <button id="seedBtn" class="btn ghost">恢复为内置样例</button>
+        </div>
+        <div id="adminMsg" class="msg"></div>
+        <div class="job-box">
+          <div class="job-head">
+            <strong>更新日志</strong>
+            <span id="jobStatusBadge" class="badge ghost">空闲</span>
+          </div>
+          <pre id="jobLog" class="job-log">尚未触发更新</pre>
+        </div>
+        <div class="job-box">
+          <div class="job-head"><strong>最近更新历史</strong></div>
+          <div id="historyList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
